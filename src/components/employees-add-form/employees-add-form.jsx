@@ -7,27 +7,41 @@ class EmployeesAddForm extends Component {
     this.state = {
       name: '',
       salary: '',
+      validate: '', //ДОБАВИЛ ПРОПС ДЛЯ СТИЛЯ (стиль создал)
+
     };
   }
 
   onValueChange = (e) => {
-    this.setState({
-      [e.target.name]: e.target.value,
-    });
-  };
 
+    this.setState(() => {
+      return {
+        [e.target.name]: e.target.value,
+      }
+    });
+    
+  };
+  
   onSubmitEmployee = (e) => {
     e.preventDefault();
-    this.props.onAdd(this.state.name, this.state.salary)
-    this.setState({
-      name: '',
-      salary: ''
-    })
-    console.log(this.props);
+    if (this.state.name.length < 3 || !this.state.salary) {
+      this.setState(()=>{
+         return { validate:'deny'}
+      })
+    } else {
+      this.setState(() => {
+        return {
+          name: '',
+          salary: '',
+          validate: ''
+        }
+      })
+      this.props.onAdd(this.state.name, this.state.salary)
+    };
   };
 
   render() {
-    const { name, salary } = this.state;
+    const { name, salary, validate } = this.state;
     return (
       <div className="app-add-form">
         <h3>Добавьте нового сотрудника</h3>
@@ -38,7 +52,7 @@ class EmployeesAddForm extends Component {
           <input
             onChange={this.onValueChange}
             type="text"
-            className="form-control new-post-label"
+            className={`form-control new-post-label ${validate}`}
             placeholder="Как его зовут?"
             name="name"
             value={name}
@@ -46,7 +60,7 @@ class EmployeesAddForm extends Component {
           <input
             onChange={this.onValueChange}
             type="number"
-            className="form-control new-post-label"
+            className={`form-control new-post-label ${validate}`}
             placeholder="З/П в $?"
             name="salary"
             value={salary}
