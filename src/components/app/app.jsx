@@ -1,9 +1,11 @@
 import { Component } from 'react';
+
 import AppInfo from '../app-info/app-info';
 import SearchPanel from '../search-panel/search-panel';
 import AppFilter from '../app-filter/app-filter';
 import EmployeesList from '../employees-list/employees-list';
 import EmployeesAddForm from '../employees-add-form/employees-add-form';
+
 import './app.css';
 
 class App extends Component {
@@ -12,76 +14,109 @@ class App extends Component {
     this.state = {
       data: [
         {
-          name: 'Max', salary: 800, increase: true,rise:true, id: 1,
+          name: 'John C.', salary: 800, increase: false, rise: true, id: 1,
         },
         {
-          name: 'Bob', salary: 1000, increase: false,rise:false, id: 2,
+          name: 'Alex M.', salary: 3000, increase: true, rise: false, id: 2,
         },
         {
-          name: 'Alex', salary: 1500, increase: true,rise:false, id: 3,
+          name: 'Carl W.', salary: 5000, increase: false, rise: false, id: 3,
         },
       ],
+      term: '',
+      filter: 'all',
     };
     this.maxId = 4;
   }
 
   deleteItem = (id) => {
     this.setState(({ data }) => ({
-      data: data.filter((employee) => employee.id !== id),
+      data: data.filter((item) => item.id !== id),
     }));
-  }
+  };
 
+  // Да, пока могут добавляться пустые пользователи. Мы это еще исправим
   addItem = (name, salary) => {
     const newItem = {
       name,
       salary,
       increase: false,
-      rise:false,
-      id: this.maxId++
-    }
+      rise: false,
+      // eslint-disable-next-line no-plusplus
+      id: this.maxId++,
+    };
     this.setState(({ data }) => {
       const newArr = [...data, newItem];
       return {
-        data: newArr
-      }
+        data: newArr,
+      };
     });
-  }
+  };
 
   onToggleProp = (id, prop) => {
-    this.setState(({ data }) => {
-      return {
-        data: data.map(item => {
-          if (item.id === id) {
-            return { ...item, [prop]:!item[prop] }
-          }
-          return item
-        })
-      }
-    })
-  }
+    this.setState(({ data }) => ({
+      data: data.map((item) => {
+        if (item.id === id) {
+          return { ...item, [prop]: !item[prop] };
+        }
+        return item;
+      }),
+    }));
+  };
+
+  // eslint-disable-next-line class-methods-use-this
+  searchEmp = (items, term) => {
+    if (term.length === 0) {
+      return items;
+    }
+
+    return items.filter((item) => item.name.indexOf(term) > -1);
+  };
+
+  onUpdateSearch = (term) => {
+    this.setState({ term });
+  };
+
+  // eslint-disable-next-line class-methods-use-this
+  filterPost = (items, filter) => {
+    switch (filter) {
+      case 'rise':
+        return items.filter((item) => item.rise);
+      case 'moreThen1000':
+        return items.filter((item) => item.salary > 1000);
+      default:
+        return items;
+    }
+  };
+
+  onFilterSelect = (filter) => {
+    this.setState({ filter });
+  };
 
   render() {
-    const employees = this.state.data.length
-    const increased = this.state.data.filter((element) => element.increase == true).length
-    
+    const { data, term, filter } = this.state;
+    const employees = data.length;
+    const increased = data.filter((item) => item.increase).length;
+    const visibleData = this.filterPost(this.searchEmp(data, term), filter);
+
     return (
       <div className="app">
         <AppInfo employees={employees} increased={increased} />
+
         <div className="search-panel">
-          <SearchPanel />
-          <AppFilter />
+          <SearchPanel onUpdateSearch={this.onUpdateSearch} />
+          <AppFilter filter={filter} onFilterSelect={this.onFilterSelect} />
         </div>
+
         <EmployeesList
-          data={this.state.data}
+          data={visibleData}
           onDelete={this.deleteItem}
           onToggleProp={this.onToggleProp}
         />
-        <EmployeesAddForm
-          onAdd={this.addItem}
-        />
+        <EmployeesAddForm onAdd={this.addItem} />
       </div>
-
     );
   }
 }
+
 export default App;

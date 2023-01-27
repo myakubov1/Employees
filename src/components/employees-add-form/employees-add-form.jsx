@@ -7,37 +7,30 @@ class EmployeesAddForm extends Component {
     this.state = {
       name: '',
       salary: '',
-      validate: '', //ДОБАВИЛ ПРОПС ДЛЯ СТИЛЯ (стиль создал)
-
+      validate: '',
     };
   }
 
   onValueChange = (e) => {
-
-    this.setState(() => {
-      return {
-        [e.target.name]: e.target.value,
-      }
-    });
-    
+    this.setState(() => ({
+      [e.target.name]: e.target.value,
+    }));
   };
-  
+
   onSubmitEmployee = (e) => {
+    const { onAdd } = this.props;
+    const { name, salary } = this.state;
     e.preventDefault();
-    if (this.state.name.length < 3 || !this.state.salary) {
-      this.setState(()=>{
-         return { validate:'deny'}
-      })
+    if (name.length < 3 || !salary) {
+      this.setState(() => ({ validate: 'deny' }));
     } else {
-      this.setState(() => {
-        return {
-          name: '',
-          salary: '',
-          validate: ''
-        }
-      })
-      this.props.onAdd(this.state.name, this.state.salary)
-    };
+      onAdd(name, salary);
+      this.setState(() => ({
+        name: '',
+        salary: '',
+        validate: '',
+      }));
+    }
   };
 
   render() {
